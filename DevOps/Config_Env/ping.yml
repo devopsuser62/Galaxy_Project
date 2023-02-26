@@ -1,0 +1,9 @@
+---
+- name: Ping dynamic inventory
+# hosts: Kubernetes_Master
+# hosts: Kubernetes_Worker 
+# hosts: NFS_Server
+  hosts: all
+  tasks:
+    - name: Ping dynamic inventory
+      ping:  

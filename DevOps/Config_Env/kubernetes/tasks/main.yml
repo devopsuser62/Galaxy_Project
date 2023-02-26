@@ -1,0 +1,6 @@
+---
+# tasks file for kubernetes
+
+#- import_tasks: configure_kubernetes_servers.yml
+
+- import_tasks: configure_localhost_kubernetes_server.yaml  

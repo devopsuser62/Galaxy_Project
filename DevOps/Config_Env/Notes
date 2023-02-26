@@ -1,0 +1,6 @@
+curl -LO https://dl.k8s.io/release/v1.26.1/bin/linux/arm64/kubectl
+curl -LO https://dl.k8s.io/v1.26.1/bin/linux/arm64/kubectl.sha256
+echo 4027cb0a2840bc14ec3f18151b3360dd2d1f6ce730ed5ac28bd846c17e7d73f5 kubectl | sha256sum --check
+chmod +x ./kubectl
+mv ./kubectl /usr/local/bin/kubectl
+kubectl version --client --output=yaml
