@@ -4,7 +4,7 @@ sudo su
 
 dnf update -y
 
-dnf install  wget curl mlocate tree java-11* vim -y
+dnf install  wget curl mlocate tree java-11* vim  epel-release ansible -y
 
 useradd -m -s /bin/bash -G wheel jenkins
 
