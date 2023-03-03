@@ -1,14 +1,28 @@
 #!/bin/bash
 
-sudo su 
-
 dnf update -y
 
-dnf install  wget curl mlocate tree java-11* vim  epel-release ansible -y
+dnf install  wget -y
+
+dnf install curl -y
+
+dnf install mlocate -y 
+
+dnf install tree -y
+
+dnf install vim  -y
+
+dnf install epel-release -y 
+
+dnf install ansible -y
+
+dnf install git -y
 
 useradd -m -s /bin/bash -G wheel jenkins
 
 echo "%jenkins        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers.d/no_passwd
+
+echo "alias c=clear" >> /etc/profile
 
 dnf install -y python3-pip
 
