@@ -1,0 +1,4 @@
+---
+- hosts: Jenkins-Worker
+  roles:
+  - jenkins

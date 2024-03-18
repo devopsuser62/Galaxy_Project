@@ -1,0 +1,84 @@
+---
+- name: Configuring Kubernetes Master and Worker Server (Updating Servers)
+  apt:
+    name: '*'
+    state: latest
+
+- name: Remove the Docker package
+  apt:
+    name: "{{ Docker }}"
+    state: absent
+  vars:
+    Docker:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest - docker-latest-logrotate
+    - docker-logrotate
+    - docker-engine
+
+- name: Install a list of packages using  variable
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - mlocate
+    - curl
+    - vim
+    - wget  
+  
+- name: Adding Docker repo
+  shell: apt install ca-certificates curl gnupg lsb-release -y && mkdir -m 0755 -p /etc/apt/keyrings && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg && echo  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: Configuration Docker and Installing Docker
+  shell: apt update -y && chmod a+r /etc/apt/keyrings/docker.gpg && apt update -y && apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+
+- name: Enabling/Start Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Disable swap and new files
+  shell: sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab && swapoff -a && touch /etc/sysctl.d/kubernetes.conf && touch /etc/modules-load.d/containerd.conf
+
+- name: Adding configurations to kernel modules
+  blockinfile:
+    path: /etc/modules-load.d/containerd.conf
+    block: |
+      overlay
+      br_netfilter
+
+- name: Enable transparent masquerading and facilitate Virtual Extensible LAN (VxLAN) traffic for communication between Kubernetes pods across the cluster
+  raw: modprobe overlay && modprobe br_netfilter
+
+- name: Adding configurations to Sysctl
+  blockinfile:
+    path: /etc/sysctl.d/kubernetes.conf
+    block: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.ipv4.ip_forward                 = 1
+      net.bridge.bridge-nf-call-iptables = 1
+
+- name: Reactivating Sysctl
+  raw: sysctl --system
+
+- name: Adding clear to profile
+  blockinfile:
+    path: /etc/profile
+    block: |
+      alias c=clear
+    
+- name: Adding kubernetes repo and Signing Keys
+  shell: curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/kubernetes.gpg && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/kubernetes.gpg] http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list
+
+- name: Installing Kubernetes
+  shell: apt update -y &&  apt install kubeadm kubelet kubectl -y && sudo apt-mark hold kubeadm kubelet kubectl
+
+- name: Enabling/Start Kubelet
+  service:
+    name: kubelet
+    state: started
+    enabled: yes

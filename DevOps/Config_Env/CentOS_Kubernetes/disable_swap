@@ -1,0 +1,8 @@
+sudo swapon -s
+systemctl --type swap
+sudo systemctl status "dev-mapper-cs\x2dswap.swap"
+sudo systemctl stop "dev-mapper-cs\x2dswap.swap"
+sudo systemctl mask "dev-mapper-cs\x2dswap.swap"
+sudo systemctl daemon-reload
+sudo swapoff -a
+

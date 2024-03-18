@@ -1,0 +1,144 @@
+Jenkins-Slave
+
+N/B: The same version of maven and java must be running on both Jenkins and Jenkins-Slave Server
+
+N/B: Ensure the Jenkins and Jenkins-Slave are on the same OS version
+
+Docker - Ansible Server and Jenkins-Slave server
+Jenkins - Jenkins-Slave server
+Maven  - Jenkins-Slave server
+
+Helm - Ansible Server and configure on Kubernetes Master
+git - Jenkins, Jenkins-Slave and Ansible Server
+
+
+General installation for all servers
+wget
+curl
+mlocate
+tree
+java
+vim
+
+
+Configuring Ansible Server
+
+useradd -m -s /bin/bash -G wheel jenkins
+
+passwd jenkins
+
+echo "%jenkins        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers.d/no_passwd
+
+su - jenkins
+
+sudo dnf install -y python3-pip
+
+<<<<<<< HEAD
+alternatives --set python /usr/lib/python3
+
+pip3 install ansible --user
+=======
+<<<<<<< HEAD
+alternatives --set python /usr/lib/python3
+
+pip3 install ansible --user
+=======
+alternatives --set python /usr/bin/python3
+
+
+>>>>>>> 6fe8d1d (Update)
+>>>>>>> b215ecc (updates)
+
+pip3 install boto3
+
+pip3 install botocore
+
+ansible-galaxy collection install amazon.aws
+
+pip3 install awscli --upgrade --user
+
+aws --version
+
+sudo yum module remove container-tools
+
+sudo yum-config-manager  --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+sudo yum install docker-ce -y
+pip3 install boto3^M
+^M
+pip3 install botocore^M
+^M
+ansible-galaxy collection install amazon.aws^M
+^M
+pip3 install awscli --upgrade --user^M
+^M
+aws --version^M
+^M
+sudo yum module remove container-tools^M
+^M
+sudo yum-config-manager  --add-repo https://download.docker.com/linux/centos/docker-ce.repo^M
+^M
+sudo yum install docker-ce -y^M
+^M
+cd ~/DevOps/Config_Env^M
+^M
+./docker_setup.sh^M
+^M
+sudo dnf install firewalld -y^M
+
+cd ~/DevOps/Config_Env
+
+./docker_setup.sh
+
+sudo dnf install firewalld -y
+
+sudo systemctl enable --now firewalld
+
+sudo firewall-cmd --add-port=8080/tcp --permanent
+
+sudo firewall-cmd --reload
+
+./helm_setup.sh --> Check the Ansible server under user jenkins -->> cd /DevOps/Config_Env && vim helm_setup.sh to see the script
+
+uncomment the below in the /etc/ansible/ansible.cfg and ensure the aws_ec2 plugin is listed, if it isn't ensure to add it
+
+#enable_plugins = host_list, virtualbox, yaml, constructed, aws_ec2, script, auto, yaml, ini, toml
+
+setup some EC2 instances and have the running on AWS
+
+Add Tags to the instances created on AWS to be managed by Ansible e.g Name Kubernetes_Master, OS redhat, Arch amd_x86_64.
+
+[jenkins@ip-172-31-95-13 Config_Env]$ aws configure
+AWS Access Key ID [None]: AKIASEP7EIH65ZDIQNER
+AWS Secret Access Key [None]: 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
+Default region name [None]: us-east-1
+Default output format [None]: json
+
+vim ~/.aws/credentials
+
+
+
+
+Jenkins-Slave Configuration
+
+#Create user - jenkins
+#Add user to wheel
+#Add NO PASSWD for user
+#install git
+#install java
+#export JAVA_HOME
+#install maven
+#export M2_HOME M2
+#install docker
+#start/enable docker
+#docker login
+#start/enable firewall
+#open port 8090
+#configure maven
+
+install Apache_Tomcat
+Configure Apache_Tomcat
+Start Apache_Tomcat
+
+
+

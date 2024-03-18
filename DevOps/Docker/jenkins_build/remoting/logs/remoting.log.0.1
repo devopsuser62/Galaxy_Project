@@ -1,0 +1,34 @@
+Mar 27, 2023 11:03:37 AM hudson.remoting.jnlp.Main createEngine
+INFO: Setting up agent: Jenkins-Build-Node
+Mar 27, 2023 11:03:37 AM hudson.remoting.Engine startEngine
+INFO: Using Remoting version: 3107.v665000b_51092
+Mar 27, 2023 11:03:37 AM org.jenkinsci.remoting.engine.WorkDirManager initializeWorkDir
+INFO: Using /home/jenkins/jenkins_build/remoting as a remoting work directory
+Mar 27, 2023 11:03:42 AM hudson.remoting.jnlp.Main$CuiListener error
+SEVERE: Handshake error.
+io.jenkins.remoting.shaded.jakarta.websocket.DeploymentException: Handshake error.
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.client.ClientManager$3$1.run(ClientManager.java:658)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.client.ClientManager$3.run(ClientManager.java:696)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:515)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.client.ClientManager$SameThreadExecutorService.execute(ClientManager.java:849)
+	at java.base/java.util.concurrent.AbstractExecutorService.submit(AbstractExecutorService.java:118)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.client.ClientManager.connectToServer(ClientManager.java:493)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.client.ClientManager.connectToServer(ClientManager.java:337)
+	at hudson.remoting.Engine.runWebSocket(Engine.java:678)
+	at hudson.remoting.Engine.run(Engine.java:499)
+Caused by: io.jenkins.remoting.shaded.org.glassfish.tyrus.core.HandshakeException: Response code was not 101: 500.
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.client.TyrusClientEngine.processResponse(TyrusClientEngine.java:301)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.container.jdk.client.ClientFilter.processRead(ClientFilter.java:167)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.container.jdk.client.Filter.onRead(Filter.java:111)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.container.jdk.client.Filter.onRead(Filter.java:113)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.container.jdk.client.Filter.onRead(Filter.java:113)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.container.jdk.client.TransportFilter$4.completed(TransportFilter.java:295)
+	at io.jenkins.remoting.shaded.org.glassfish.tyrus.container.jdk.client.TransportFilter$4.completed(TransportFilter.java:279)
+	at java.base/sun.nio.ch.Invoker.invokeUnchecked(Invoker.java:127)
+	at java.base/sun.nio.ch.Invoker$2.run(Invoker.java:219)
+	at java.base/sun.nio.ch.AsynchronousChannelGroupImpl$1.run(AsynchronousChannelGroupImpl.java:112)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	at java.base/java.lang.Thread.run(Thread.java:829)
+

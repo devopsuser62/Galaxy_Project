@@ -1,0 +1,11 @@
+#On-Premises VM for Jenkins-Slave {VMWare}
+[inventory]
+
+[localhost]
+172.16.26.132
+
+[Jenkins-Master]
+172.16.26.130
+
+[Jenkins-Slave]
+172.16.26.131

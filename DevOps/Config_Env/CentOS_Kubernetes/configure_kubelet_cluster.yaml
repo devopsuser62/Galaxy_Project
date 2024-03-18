@@ -1,0 +1,109 @@
+---
+- name: Configuring Cluster
+  hosts: Cluster
+  tasks:
+  - name: Creating configuration files
+    ansible.builtin.file:
+      path: /etc/default/kubelet
+      state: touch
+
+  - name: Configuring Kubelet
+    ansible.builtin.blockinfile:
+      path: /etc/default/kubelet
+      block: |
+        KUBELET_EXTRA_ARGS="--cgroup-driver=cgroupfs"
+
+
+  - name: Creating Alias for clear and Setting vim as Systemd Editor
+    ansible.builtin.blockinfile:
+      path: /etc/profile
+      block: |
+        alias c=clear
+        SYSTEMD_EDITOR="vim"
+        export SYSTEMD_EDITOR
+
+  - name: Sourcing profile file
+    shell: source /etc/profile
+
+  - name: Reloading Systemd
+    ansible.builtin.systemd:
+      daemon_reload: true
+
+  - name: Restart Kubelet service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: kubelet
+
+  - name: Creating kubelet configuring directory
+    ansible.builtin.file:
+      path: /etc/systemd/system/kubelet.service.d/
+      state: directory
+
+  - name: Copy kubelet configuration file
+    ansible.builtin.copy:
+      src: /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+      dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+      remote_src: yes
+  
+  - name: Configuring Kubelet
+    ansible.builtin.blockinfile:
+      path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+      insertafter: "[Service]"  
+      block: |
+        Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"
+
+  - name: Restart Kubelet service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: kubelet
+
+  - name: Stop and Disable Firewall
+    ansible.builtin.service:
+      name: firewalld
+      state: stopped
+      enabled: no
+
+  - name: Creating config files
+    ansible.builtin.file:
+      path: /etc/docker/daemon.json
+      state: absent
+
+  - name: Configuring Containerd
+    ansible.builtin.lineinfile:
+      path: /etc/containerd/config.toml
+      state: present
+      regexp: '^disabled_plugins = ["cri"]'
+      line: 'disabled_plugins = []'
+
+  - name: Configuring Kubelet
+    ansible.builtin.blockinfile:
+      path: /etc/containerd/config.toml
+      insertafter: "disabled_plugins"
+      block: |
+        [plugins."io.containerd.grpc.v1.cri"]
+          sandbox_image = "registry.k8s.io/pause:3.2"
+
+  - name: Restart Kubelet service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: kubelet
+
+  - name: Restart Docker service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: docker
+
+
+  - name: Restart Containerd service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: containerd
+ 
+  - name: Enabling Service
+    shell: systemctl enable containerd && systemctl enable docker
+

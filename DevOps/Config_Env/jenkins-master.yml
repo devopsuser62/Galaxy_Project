@@ -1,0 +1,8 @@
+---
+<<<<<<< HEAD
+- hosts: localhost
+=======
+- hosts: Jenkins-Master
+>>>>>>> 7141c9c (Updates)
+  roles:
+  - jenkins

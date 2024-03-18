@@ -1,0 +1,201 @@
+Fusion Player 13 – Personal Use		0H48K-4AK8P-M88Q2-003U2-1RAP4
+
+
+
+sudo kubeadm init --config kubeadm.yaml
+
+sudo kubeadm config migrate --old-config kubeadm.yaml --new-config kubeadm.yaml
+
+sudo kubeadm init --config kubeadm.yaml
+
+sudo kubeadm init --pod-network-cidr=10.0.2.179/16
+
+
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+
+
+
+ sudo su -
+ 
+    3  source /etc/profile
+    4  c
+    5  kubeadm config images pull
+    6  c
+    7  sudo kubeadm config images pull
+    8  sudo su -
+    9  c
+   10  sudo su -
+   11  mkdir -p $HOME/.kube
+   12  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+   13  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+   14  c
+   15  kubectl get nodes
+   16  watch kubectl get nodes
+   17  kubectl describe node ip-10-0-1-169.ec2.internal
+   18  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+   19  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+   20  kubectl get nodes
+   21  watch kubectl get nodes
+   22  kubectl run nginx --image=nginx
+   23  kubectl get pods
+   24  watch kubectl get pods
+   25  c
+   26  kubectl get pods
+   27  kubectl describe pod nginx
+   28  history
+
+
+    1  echo "alias c=clear" >> /etc/profile
+    2  source /etc/profile
+    3  c
+    4  systemctl status kubelet
+    5  c
+    6  systemctl status docker
+    7  c
+    8  exit
+    9  echo '{
+   10    "exec-opts": ["native.cgroupdriver=systemd"]
+   11  }' > /etc/docker/daemon.json
+   12  systemctl restart docker
+   13  systemctl status docker
+   14  c
+   15  exit
+
+
+N/B: Nodes and Volumes (PV) does not belong to any namespace thus is considered it belongs a global namespace
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+mkdir -p $HOME/.kube
+
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+systemctl status containerd -->> Both on Master and Worker
+
+rm -f vim /etc/containerd/config.toml -->> Both on Master and Worker
+
+'disabled_plugins = []'
+         
+[plugins."io.containerd.grpc.v1.cri"]
+  sandbox_image = "registry.k8s.io/pause:3.2"      
+
+sudo systemctl restart containerd  -->> Both on Master and Worker
+
+sudo kubeadm config images pull
+
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16  --> Token for Worker to join
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml
+
+kubectl get nodes
+
+watch kubectl get nodes
+
+kubectl run nginx --image=nginx
+
+kubectl get pods
+
+watch kubectl get pods
+
+kubectl describe pod nginx
+
+
+Configuring Docker cGroup  --> Master Node
+-------------------------
+
+sudo vim /etc/systemd/system/docker-engine.slice
+
+sudo vim /etc/systemd/system/docker-engine.slice
+
+[Unit]
+Description=Slice that limits docker resources #any custom desc.
+Before=slices.target #is importand because over layer should be running 
+[Slice]
+CPUAccounting=true
+CPUQuota=50%    #docker daemond can use max 50% of cpus
+#Memory Management
+MemoryAccounting=true
+MemoryHigh=2G  #allowed amount, might be go over then process will slow down
+MemoryMax=3G #maximum usage of memory, the process cannot use more
+MemoryMaxSwap=10G #maximum swap capacity
+
+sudo vim /etc/systemd/system/multi-user.target.wants/docker.service
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+[Service] --->> Add the below under the Service section AKA this section
+Slice=docker-engine.slice
+
+
+Change cgroup driver to systemd . This step is also will be done in docker.service file in [Service] part
+
+default Execution
+
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock {This is Default and to be changed. See below for the change}
+
+
+ExecStart=/usr/bin/dockerd --exec-opt native.cgroupdriver=systemd  {This is to be the new value of the "ExecStart"}
+
+
+
+$ sudo vim /etc/docker/daemon.json
+
+{
+ "cgroup-parent": "docker-engine.slice"
+}
+
+
+
+sudo systemctl daemon-reload
+
+sudo systemctl restart docker.service
+
+sudo vim /etc/containerd/config.toml
+
+[plugins."io.containerd.grpc.v1.cri"]
+  sandbox_image = "registry.k8s.io/pause:3.2"
+
+
+
+sudo systemctl daemon-reload
+
+sudo systemctl restart containerd.service
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

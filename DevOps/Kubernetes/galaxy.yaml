@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: galaxy-deployment
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: galaxy
+  template:
+    metadata:
+      labels:
+        app: galaxy
+    spec:
+      containers:
+      - name: galaxy
+        image: devopsuser62/galaxy:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: galaxy-service
+spec:
+  type: NodePort
+  ports:
+  - port: 3323
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: galaxy
+

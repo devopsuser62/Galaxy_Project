@@ -1,0 +1,4 @@
+export terraform=/home/jenkins/terraform
+
+export PATH=$PATH:$terraform
+

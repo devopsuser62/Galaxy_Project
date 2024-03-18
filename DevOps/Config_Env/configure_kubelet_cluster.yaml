@@ -1,0 +1,133 @@
+---
+- name : Configuring Cluster
+  hosts: Cluster
+  tasks:
+    # - name: Creating configuration files
+    # ansible.builtin.blockinfile:
+    # path: /etc/default/kubelet
+    # state: touch
+
+    # - name: Configuring Kubelet
+    # ansible.builtin.blockinfile:
+    # path: /etc/default/kubelet
+    # block: |
+    #   KUBELET_EXTRA_ARGS="--cgroup-driver=cgroupfs"
+
+  - name: Reloading Systemd
+    ansible.builtin.systemd:
+      daemon_reload: true
+
+  - name: Creating kubelet config directorty
+    ansible.builtin.file:
+      path: /etc/systemd/system/kubelet.service.d/
+      state: directory
+
+  - name: Copy kubelet config file to the newly created directory
+    ansible.builtin.copy:
+      src: /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+      dest: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+      remote_src: yes
+
+  - name: Configuring Kubeadm
+    ansible.builtin.blockinfile:
+      path: /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+      block: |
+        Environment="KUBELET_EXTRA_ARGS=--fail-swap-on=false"
+
+  - name: Restart Kubelet service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: kubelet
+
+  - name: Stop and Disable Firewalld
+    service:
+      name: firewalld
+      state: stopped
+      enabled: no
+
+  # - name: Creating config files
+  #   ansible.builtin.file:
+  #     path: /etc/systemd/system/docker-engine.slice
+  #     state: touch
+         
+  #- name: Configuring Kubelet
+  #  ansible.builtin.blockinfile:
+  #     path: /etc/systemd/system/docker-engine.slice
+  #     block: |
+  #       [Unit]
+  #      Description=Slice that limits docker resources #any custom desc.
+  #      Before=slices.target #is importand because over layer should be running
+  #      [Slice]
+  #      CPUAccounting=true
+  #      CPUQuota=50%    #docker daemond can use max 50% of cpus
+  #       #Memory Management
+  #      MemoryAccounting=true
+  #      MemoryHigh=2G  #allowed amount, might be go over then process will slow down
+  #      MemoryMax=3G #maximum usage of memory, the process cannot use more
+  #      MemoryMaxSwap=10G #maximum swap capacity
+
+ # - name: Creating config files
+ #   ansible.builtin.file:
+ #    path: /etc/docker/daemon.json
+ #     state: touch
+
+ # - name: Configuring Kubelet
+ #   ansible.builtin.blockinfile:
+ #     path: /etc/docker/daemon.json
+ #     block: |
+ #       {
+ #         "cgroup-parent": "docker-engine.slice"
+ #       } 
+
+  - name: Remove file (delete file)
+    ansible.builtin.file:
+      path: /etc/containerd/config.toml
+      state: absent
+
+  - name: Creating containerd config file
+    ansible.builtin.file:
+      path: /etc/containerd/config.toml
+      state: touch 
+
+  - name: Configuring Containerd
+    ansible.builtin.blockinfile:
+      path: /etc/containerd/config.toml
+      block: |
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+          SystemdCgroup = true
+          sandbox_image = "registry.k8s.io/pause:3.2"
+
+
+#   - name: Configuring Docker cGroup to Systemd
+#     ansible.builtin.lineinfile:
+#       path: /etc/systemd/system/multi-user.target.wants/docker.service
+#       regexp: '^ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock$'
+#       line: 'ExecStart=/usr/bin/dockerd --exec-opt native.cgroupdriver=systemd'
+
+#   - name: Configuring Docker cGroup to Systemd
+#    ansible.builtin.blockinfile:
+#      path: /etc/systemd/system/multi-user.target.wants/docker.service
+#      insertafter: "StartLimitInterval="
+#      block: |
+#        Slice=docker-engine.slice
+
+  - name: Restart Kubelet service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: kubelet
+
+  - name: Restart Docker service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: docker
+
+
+  - name: Restart Containerd service
+    ansible.builtin.systemd:
+      state: restarted
+      daemon_reload: true
+      name: containerd
+     

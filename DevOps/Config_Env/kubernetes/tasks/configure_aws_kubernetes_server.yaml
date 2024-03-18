@@ -1,0 +1,139 @@
+---
+- name: Configuring Kubernetes Master and Worker Server (Updating Servers)
+  yum:
+    name: '*'
+    state: latest
+
+- name: Remove the Docker package
+  yum:
+    name: "{{ Docker }}"
+    state: absent
+  vars:
+    Docker:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-engine
+
+- name: Install a list of packages using  variable
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - yum-utils
+    - epel-release
+    - tree
+    - mlocate
+    - curl
+    - vim
+    - wget
+    - firewalld  
+    - libselinux-python
+    - selinux-policy 
+
+- name: Disabling/Stopping Firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Adding Docker Repo
+  shell: yum-config-manager  --add-repo   https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: Installing Docker
+  shell: yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+- name: Adding centos to docker group
+  shell: usermod -a -G docker centos
+
+- name: Disabling/Stopping Docker
+  service:
+    name: docker
+    state: stopped
+    enabled: no
+
+- name: Setting SELinux in permissive mode
+  selinux:
+    policy: targeted
+    state: permissive
+
+
+- name: Creating kubernetes.conf File
+  ansible.builtin.file:
+    path: /etc/sysctl.d/kubernetes.conf
+    state: touch
+
+- name: Creating kubernetes.repo File
+  ansible.builtin.file:
+    path: /etc/yum.repos.d/kubernetes.repo
+    state: touch
+
+- name: Creating k8s.conf File
+  ansible.builtin.file:
+    path: /etc/modules-load.d/k8s.conf
+    state: touch
+      
+- name: Disable swap
+  shell: sed -i '/swap/d' /etc/fstab && swapoff -a 
+
+- name: Adding configurations to kernel modules
+  blockinfile:
+    path: /etc/modules-load.d/k8s.conf
+    block: |
+      overlay
+      br_netfilter
+
+- name: Creating Alias for Clear
+  blockinfile:
+    path: /etc/profile
+    block: |
+      alias c=clear
+  
+- name: Enable transparent masquerading and facilitate Virtual Extensible LAN (VxLAN) traffic for communication between Kubernetes pods across the cluster
+  shell: modprobe overlay && modprobe br_netfilter
+
+- name: Adding configurations to Sysctl
+  blockinfile:
+    path: /etc/sysctl.d/kubernetes.conf
+    block: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.ipv4.ip_forward                 = 1
+      net.bridge.bridge-nf-call-iptables = 1
+
+- name: Reactivating Sysctl
+  shell: sysctl --system
+
+    
+- name: Adding kubernetes repo
+  blockinfile:
+    path: /etc/yum.repos.d/kubernetes.repo
+    block: |
+      [kubernetes]
+      name=Kubernetes
+      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+      enabled=1
+      gpgcheck=1
+      repo_gpgcheck=1
+      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      exclude=kubelet kubeadm kubectl
+
+- name: Installing Kubernetes
+  shell: yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+- name: Enabling/Start Kubelet
+  service:
+    name: kubelet
+    state: started
+    enabled: yes
+
+- name: Enabling/Start Containerd
+  service:
+    name: containerd
+    state: started
+    enabled: yes
+      
+      
