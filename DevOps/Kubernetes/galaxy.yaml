@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+devopsuser62/galaxy:latestdevopsuser62/galaxy:latestapiVersion: apps/v1
 kind: Deployment
 metadata:
   name: galaxy-deployment
